@@ -123,7 +123,3 @@ python app.py
 Open your browser and navigate to:
 **`http://127.0.0.1:5000`**
 
----
-
-## ⚕️ Educational Disclaimer
-*PulseAI is designed solely as an academic MCA software prototype demonstrating Artificial Intelligence, NLP, and Computer Vision integration in healthcare informatics. The outputs, predictions, and risk levels are not certified clinical diagnoses or prescriptions. For actual medical emergencies or health concerns, always consult a licensed medical professional or dial emergency services immediately.*
