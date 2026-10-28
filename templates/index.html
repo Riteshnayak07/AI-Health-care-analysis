@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}PulseAI - Intelligent Symptom Checker & Clinical Triage{% endblock %}
+
+{% block content %}
+<section class="hero-banner">
+  <div class="badge-live">
+    <span class="dot-pulse"></span> PulseAI Clinical Diagnostics Online
+  </div>
+  <h1>Intelligent Symptom Triage & Analysis</h1>
+  <p>Describe your physical health symptoms in everyday natural language or select quick symptom tags to receive instant NLP-assisted triage and specialist guidance.</p>
+</section>
+
+<div class="glass-card">
+  <div class="card-header-bar">
+    <div class="card-title-icon">
+      <div class="icon-box">🩺</div>
+      <div>
+        <h2>Symptom Assessment Consultation</h2>
+        <p class="hint">Type naturally, use speech dictation, or tap symptom tags below</p>
+      </div>
+    </div>
+    <div>
+      <span class="logo-badge">NLP + ML Ensemble</span>
+    </div>
+  </div>
+
+  <form id="symptomForm" method="post" action="/analyze">
+    <!-- Free-text input with embedded Voice Dictation & Presets -->
+    <div class="form-group">
+      <div class="form-label">
+        <span>Describe How You Feel</span>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <span class="hint">Try presets:</span>
+          <button type="button" class="quick-sample-btn" data-text="I have high fever, chills, persistent dry cough and severe body aches.">Flu</button>
+          <button type="button" class="quick-sample-btn" data-text="Sudden crushing chest pain radiating to left shoulder and severe breathlessness.">Chest Concern</button>
+          <button type="button" class="quick-sample-btn" data-text="One-sided throbbing headache with nausea and light sensitivity.">Migraine</button>
+          <button type="button" class="quick-sample-btn" data-text="Burning sensation in chest after eating, acid reflux and sour burps.">Reflux</button>
+        </div>
+      </div>
+
+      <div class="text-area-wrapper">
+        <textarea id="symptomsInput" name="symptoms" class="form-control" placeholder="E.g., I have been feeling feverish with a sore throat, dry cough, headache, and severe fatigue since yesterday..." required></textarea>
+        
+        <div class="textarea-action-bar">
+          <button type="button" id="voiceInputBtn" class="voice-btn" title="Click and speak your symptoms">
+            <span>🎙️</span> Speak Symptoms
+          </button>
+          <span style="font-size: 12px; color: var(--text-muted);">Speak clearly into microphone</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Categorized Symptom Tag Selector -->
+    <div class="chips-section">
+      <div class="form-label">
+        <span>Interactive Quick-Add Symptom Tags</span>
+        <span class="hint">Click to toggle symptoms into your description</span>
+      </div>
+
+      <div class="category-tab-header">
+        <button type="button" class="cat-tab-btn active" data-cat="all">All Categories</button>
+        {% for cat_name in categories.keys() %}
+          <button type="button" class="cat-tab-btn" data-cat="{{ cat_name }}">{{ cat_name }}</button>
+        {% endfor %}
+      </div>
+
+      <div class="chips-cloud">
+        {% for cat_name, sym_list in categories.items() %}
+          <div class="cat-cloud-group" data-cat="{{ cat_name }}" style="display: flex; flex-wrap: wrap; gap: 8px;">
+            {% for s in sym_list %}
+              <div class="symptom-chip" data-symptom="{{ s }}">
+                <span>+</span> {{ s|title }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Controls: Symptom Severity & Duration -->
+    <div class="controls-grid">
+      <div class="form-group">
+        <label class="form-label">Symptom Severity Intensity</label>
+        <div class="severity-pill-group">
+          <label>
+            <input type="radio" name="severity" value="mild">
+            <span>🟢 Mild</span>
+          </label>
+          <label>
+            <input type="radio" name="severity" value="moderate" checked>
+            <span>🟡 Moderate</span>
+          </label>
+          <label>
+            <input type="radio" name="severity" value="severe">
+            <span>🔴 Severe</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Duration of Symptoms (Days): <span id="durationVal">2 Days</span></label>
+        <input type="range" name="duration" min="1" max="14" value="2" class="form-control" oninput="document.getElementById('durationVal').innerText = this.value + ' Days'">
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary btn-full" style="font-size: 16px; padding: 15px;">
+      <span>🩺</span> Generate Clinical Assessment & Triage Report
+    </button>
+  </form>
+</div>
+
+<!-- Real-time Live Assessment Card (Updated via AJAX while typing) -->
+<div id="liveResultCard" class="glass-card result-header-card" style="display: none; margin-top: 24px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary);">
+      ⚡ Live Diagnostic Prediction Preview
+    </div>
+    <span id="liveUrgencyBadge" class="badge-priority Mild">Mild Priority</span>
+  </div>
+
+  <h3 id="livePredictionText" class="condition-title" style="margin: 0 0 8px 0;">Condition Matching...</h3>
+  
+  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+    <div style="font-size: 14px; color: var(--text-muted);">
+      Confidence: <strong id="liveConfidenceText" style="color: var(--primary);">0.0%</strong>
+    </div>
+    <div class="progress-track" style="flex: 1; margin: 0;">
+      <div id="liveConfidenceBar" class="progress-fill" style="width: 0%;"></div>
+    </div>
+  </div>
+
+  <div class="specialist-callout" style="margin: 10px 0;">
+    <span>👨‍⚕️</span>
+    <div>
+      Recommended Specialist: <b id="liveSpecialistText">General Physician</b>
+    </div>
+  </div>
+
+  <p id="liveDescText" style="font-size: 14px; color: var(--text-muted); margin: 0;"></p>
+</div>
+{% endblock %}

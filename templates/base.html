@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PulseAI - Intelligent Healthcare & Diagnostic Assistant{% endblock %}</title>
+  <meta name="description" content="AI-assisted clinical triage, symptom analysis, medical computer vision and health risk analytics.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="logo-group">
+        <div class="logo-icon-pulse">🩺</div>
+        <div class="logo-text">
+          Pulse<span>AI</span>
+          <span class="logo-badge">Clinical ML</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}"><span>🩺</span> Symptom Checker</a></li>
+          <li><a href="/vision" class="nav-link {% if request.path == '/vision' %}active{% endif %}"><span>🔬</span> Medical Vision</a></li>
+          <li><a href="/vitals" class="nav-link {% if request.path == '/vitals' %}active{% endif %}"><span>🧮</span> Health Vitals</a></li>
+          <li><a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}"><span>📊</span> Analytics</a></li>
+          <li><a href="/emergency" class="nav-link {% if request.path == '/emergency' %}active{% endif %}"><span>🚑</span> Emergency</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Dark/Light Mode">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-wrapper">
+    {% block content %}{% endblock %}
+
+    <!-- Global Medical Disclaimer Banner -->
+    <aside class="medical-disclaimer-box">
+      <div class="disclaimer-icon">⚕️</div>
+      <div>
+        <strong>Educational Academic Prototype:</strong> PulseAI is an MCA software engineering demonstration using NLP, Computer Vision, and Machine Learning. Predictions are for informational and educational triage demonstration only and do not constitute certified medical diagnosis or clinical prescriptions. For acute, sudden, or life-threatening symptoms, contact emergency medical services immediately.
+      </div>
+    </aside>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div>
+        <b>PulseAI Health Intelligence System</b> &bull; MCA Academic Mini Project
+      </div>
+      <div>
+        Powered by Python, Flask, Scikit-Learn NLP, OpenCV & SQLite
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

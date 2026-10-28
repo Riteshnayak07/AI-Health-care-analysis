@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical Analytics Dashboard - PulseAI{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+  <div>
+    <h1>Clinical Analytics Dashboard</h1>
+    <p style="color: var(--text-muted); font-size: 14px;">Real-time epidemiological consultation insights and machine learning model metrics</p>
+  </div>
+  <div style="display: flex; gap: 10px;">
+    <a href="/api/export-csv" class="btn btn-secondary" style="font-size: 13px; padding: 10px 16px;">
+      <span>📥</span> Export CSV
+    </a>
+    <form method="post" action="/api/seed-demo" style="display: inline;">
+      <button type="submit" class="btn btn-secondary" style="font-size: 13px; padding: 10px 16px;" title="Populate realistic sample records for presentation">
+        <span>✨</span> Load Demo Data
+      </button>
+    </form>
+    <a href="/" class="btn btn-primary" style="font-size: 13px; padding: 10px 16px;">
+      <span>➕</span> New Analysis
+    </a>
+  </div>
+</div>
+
+<!-- 4 Key Performance Metric Cards -->
+<div class="stats-cards-grid">
+  <div class="stat-metric-card">
+    <div class="stat-metric-icon" style="background: rgba(14, 165, 233, 0.1); color: var(--primary);">📋</div>
+    <div>
+      <div class="stat-metric-val">{{ stats.total }}</div>
+      <div class="stat-metric-label">Total Consultations</div>
+    </div>
+  </div>
+
+  <div class="stat-metric-card">
+    <div class="stat-metric-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--urgency-urgent);">🚨</div>
+    <div>
+      <div class="stat-metric-val" style="color: var(--urgency-urgent);">{{ stats.urgent_count }}</div>
+      <div class="stat-metric-label">Urgent Triages</div>
+    </div>
+  </div>
+
+  <div class="stat-metric-card">
+    <div class="stat-metric-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--urgency-mild);">🎯</div>
+    <div>
+      <div class="stat-metric-val">{{ stats.avg_confidence }}%</div>
+      <div class="stat-metric-label">Avg. Model Confidence</div>
+    </div>
+  </div>
+
+  <div class="stat-metric-card">
+    <div class="stat-metric-icon" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple);">🩺</div>
+    <div>
+      <div class="stat-metric-val" style="font-size: 18px; line-height: 1.3;">{{ stats.top_condition }}</div>
+      <div class="stat-metric-label">Top Condition</div>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Charts Grid (Chart.js) -->
+<div class="charts-grid">
+  <div class="chart-card">
+    <div class="card-header-bar" style="margin-bottom: 12px; padding-bottom: 8px;">
+      <h3 style="font-size: 16px;">Condition Prevalence Distribution</h3>
+      <span style="font-size: 12px; color: var(--text-muted);">Doughnut Distribution</span>
+    </div>
+    <div class="chart-container-inner">
+      <canvas id="conditionChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="card-header-bar" style="margin-bottom: 12px; padding-bottom: 8px;">
+      <h3 style="font-size: 16px;">Triage Urgency Breakdown</h3>
+      <span style="font-size: 12px; color: var(--text-muted);">Severity Spectrum</span>
+    </div>
+    <div class="chart-container-inner">
+      <canvas id="urgencyChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Symptom Frequency Chart -->
+<div class="chart-card" style="margin-bottom: 32px;">
+  <div class="card-header-bar" style="margin-bottom: 12px; padding-bottom: 8px;">
+    <h3 style="font-size: 16px;">Most Frequently Reported Clinical Symptoms</h3>
+    <span style="font-size: 12px; color: var(--text-muted);">Prevalence Ranking</span>
+  </div>
+  <div class="chart-container-inner" style="height: 220px;">
+    <canvas id="symptomChart"></canvas>
+  </div>
+</div>
+
+<!-- Consultations History Table -->
+<div class="glass-card">
+  <div class="card-header-bar">
+    <div>
+      <h2>Historical Consultations Log</h2>
+      <p class="hint">Searchable registry of past symptom analyses and computer vision scans</p>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <input type="text" id="tableSearchInput" class="form-control" placeholder="Search logs..." style="width: 220px; padding: 8px 14px; font-size: 13px;">
+      <form method="post" action="/api/clear-all" onsubmit="return confirm('Clear all consultation history?')">
+        <button type="submit" class="btn btn-danger" style="font-size: 12px; padding: 8px 14px;">Clear All</button>
+      </form>
+    </div>
+  </div>
+
+  {% if records %}
+    <div class="table-responsive">
+      <table id="historyTable" class="modern-table">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Type</th>
+            <th>Input Text / Scan</th>
+            <th>Clinical Symptoms</th>
+            <th>Assessment Prediction</th>
+            <th>Score</th>
+            <th>Urgency</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+            <tr>
+              <td style="white-space: nowrap; font-size: 13px; color: var(--text-muted);">{{ r.created_at }}</td>
+              <td>
+                <span class="logo-badge" style="background: {% if r.analysis_type == 'computer_vision' %}#8b5cf6{% else %}#0ea5e9{% endif %};">
+                  {{ r.analysis_type or 'symptom' }}
+                </span>
+              </td>
+              <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.text }}">
+                {{ r.text }}
+              </td>
+              <td style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {{ r.symptoms or '—' }}
+              </td>
+              <td><b>{{ r.prediction }}</b></td>
+              <td>{{ "%.1f"|format(r.confidence) }}%</td>
+              <td>
+                <span class="badge-priority {{ r.urgency or 'Mild' }}" style="font-size: 11px; padding: 3px 8px;">
+                  {{ r.urgency or 'Mild' }}
+                </span>
+              </td>
+              <td style="white-space: nowrap;">
+                <a href="/report/{{ r.id }}" target="_blank" style="margin-right: 8px; font-size: 13px;" title="Print Report">🖨️</a>
+                <form method="post" action="/api/delete/{{ r.id }}" style="display: inline;" onsubmit="return confirm('Delete this record?')">
+                  <button type="submit" style="background: none; border: none; cursor: pointer; color: #ef4444; font-size: 13px;" title="Delete">🗑️</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+      <p style="font-size: 16px; margin-bottom: 12px;">No consultation records logged yet.</p>
+      <form method="post" action="/api/seed-demo" style="display: inline;">
+        <button type="submit" class="btn btn-primary" style="font-size: 14px;">Populate Demo Consultations</button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

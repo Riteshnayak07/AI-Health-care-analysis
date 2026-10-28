@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical Assessment Report - PulseAI{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+  <div>
+    <h1 style="font-size: 28px;">Clinical Diagnostic Assessment</h1>
+    <p style="color: var(--text-muted); font-size: 14px;">Consultation ID #{{ record_id }} &bull; Timestamp: {{ created_at }}</p>
+  </div>
+  <div style="display: flex; gap: 10px;">
+    {% if record_id %}
+      <a href="/report/{{ record_id }}" target="_blank" class="btn btn-secondary" style="padding: 10px 16px; font-size: 14px;">
+        <span>🖨️</span> Printable Patient Sheet
+      </a>
+    {% endif %}
+    <a href="/" class="btn btn-primary" style="padding: 10px 16px; font-size: 14px;">
+      <span>➕</span> New Analysis
+    </a>
+  </div>
+</div>
+
+<div class="result-grid">
+  <!-- Left Main Column -->
+  <div>
+    <!-- Condition Card -->
+    <div class="glass-card result-header-card {% if urgency == 'Urgent' %}urgent-border{% endif %}">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">
+          Primary Predicted Condition
+        </span>
+        <span class="badge-priority {{ urgency }}">{{ urgency }} Priority</span>
+      </div>
+
+      <h2 class="condition-title">{{ prediction }}</h2>
+      <p style="font-size: 15px; color: var(--text-muted); margin-bottom: 16px;">{{ description }}</p>
+
+      <!-- Specialist Callout Box -->
+      <div class="specialist-callout">
+        <div style="font-size: 24px;">👨‍⚕️</div>
+        <div>
+          <div style="font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Recommended Medical Department</div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--primary);">{{ specialist }}</div>
+        </div>
+      </div>
+
+      <!-- Detected Symptoms -->
+      <div style="margin-top: 18px;">
+        <h4 style="font-size: 14px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Extracted Clinical Symptoms</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          {% if symptoms %}
+            {% for s in symptoms %}
+              <span class="symptom-chip selected" style="cursor: default;">
+                <span>✓</span> {{ s|title }}
+              </span>
+            {% endfor %}
+          {% else %}
+            <span style="color: var(--text-muted); font-size: 14px;">No standard clinical symptoms identified.</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--card-border); font-size: 13px; color: var(--text-muted);">
+        <b>Original Input:</b> &ldquo;{{ text }}&rdquo;
+      </div>
+    </div>
+
+    <!-- Home Care & Self Management -->
+    <div class="glass-card">
+      <div class="card-header-bar" style="margin-bottom: 16px; padding-bottom: 10px;">
+        <div class="card-title-icon">
+          <div class="icon-box" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">🌿</div>
+          <div>
+            <h3 style="font-size: 18px;">Recommended Self-Care & Supportive Measures</h3>
+          </div>
+        </div>
+      </div>
+
+      <ul class="checklist">
+        {% for tip in home_care %}
+          <li>{{ tip }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Red Flags Warning Box -->
+    <div class="red-flags-box">
+      <h4><span>🚨</span> Clinical Red Flags – When to Seek Emergency Care</h4>
+      <p style="font-size: 14px; margin: 0; line-height: 1.5; color: var(--text-main);">
+        {{ red_flags }} If any of these signs develop, bypass home observation and go to the nearest emergency department or call <b>108 / 112 / 911</b>.
+      </p>
+    </div>
+  </div>
+
+  <!-- Right Sidebar Column -->
+  <div>
+    <!-- Confidence Gauge Card -->
+    <div class="glass-card confidence-gauge-box">
+      <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">
+        Diagnostic Confidence Score
+      </div>
+      <div class="confidence-number">{{ "%.1f"|format(confidence) }}%</div>
+      
+      <div class="progress-track">
+        <div class="progress-fill" style="width: {{ confidence }}%;"></div>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+        Synthesized via TF-IDF Vectorization, Logistic Classifier probabilities, and heuristic clinical pattern rules.
+      </p>
+    </div>
+
+    <!-- Differential Diagnosis Matches -->
+    {% if secondary %}
+      <div class="glass-card">
+        <h4 style="font-size: 15px; margin-bottom: 12px;">Differential Diagnoses</h4>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Other conditions with overlapping symptom features:</p>
+        <ul style="list-style: none; padding: 0;">
+          {% for match in secondary %}
+            <li style="padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 8px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+              <span style="color: var(--primary);">•</span> {{ match }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <!-- Quick Actions Card -->
+    <div class="glass-card">
+      <h4 style="font-size: 15px; margin-bottom: 12px;">Next Steps</h4>
+      <a href="/emergency" class="btn btn-secondary btn-full" style="margin-bottom: 10px; font-size: 13px;">
+        <span>🚑</span> View Emergency Directory
+      </a>
+      <a href="/vitals" class="btn btn-secondary btn-full" style="margin-bottom: 10px; font-size: 13px;">
+        <span>🧮</span> Calculate Health Vitals
+      </a>
+      <a href="/dashboard" class="btn btn-secondary btn-full" style="font-size: 13px;">
+        <span>📊</span> Open Analytics Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

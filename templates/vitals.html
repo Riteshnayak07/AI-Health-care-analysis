@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Health Vitals & Risk Calculators - PulseAI{% endblock %}
+
+{% block content %}
+<section class="hero-banner">
+  <div class="badge-live">
+    <span class="dot-pulse"></span> Clinical Biometric Calculators Active
+  </div>
+  <h1>Health Vitals & Clinical Risk Screener</h1>
+  <p>Perform evidence-based wellness assessments including Body Mass Index (BMI), Basal Metabolic Rate (BMR), Cardiovascular Lifestyle Risk, and Daily Hydration requirements.</p>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+
+  <!-- 1. BMI & BMR Calculator Card -->
+  <div class="glass-card">
+    <div class="card-header-bar" style="margin-bottom: 16px; padding-bottom: 12px;">
+      <div class="card-title-icon">
+        <div class="icon-box">⚖️</div>
+        <div>
+          <h3>BMI & Metabolic Rate</h3>
+          <p class="hint">Height, weight & age calculation</p>
+        </div>
+      </div>
+    </div>
+
+    <form method="post" action="/vitals">
+      <input type="hidden" name="calc_type" value="bmi">
+      <div class="controls-grid" style="margin-bottom: 14px;">
+        <div>
+          <label class="form-label">Weight (kg)</label>
+          <input type="number" step="0.5" name="weight" class="form-control" placeholder="70" required value="70">
+        </div>
+        <div>
+          <label class="form-label">Height (cm)</label>
+          <input type="number" step="1" name="height" class="form-control" placeholder="175" required value="175">
+        </div>
+      </div>
+
+      <div class="controls-grid" style="margin-bottom: 18px;">
+        <div>
+          <label class="form-label">Age</label>
+          <input type="number" name="age" class="form-control" placeholder="25" required value="25">
+        </div>
+        <div>
+          <label class="form-label">Gender</label>
+          <select name="gender" class="form-control">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full">Compute BMI & BMR</button>
+    </form>
+
+    {% if bmi %}
+      <div style="margin-top: 20px; padding: 18px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Your BMI Score</span>
+          <span class="badge-priority {% if bmi.status_class == 'success' %}Mild{% elif bmi.status_class == 'warning' %}Moderate{% else %}Urgent{% endif %}">
+            {{ bmi.category }}
+          </span>
+        </div>
+        <div style="font-size: 32px; font-weight: 800; font-family: var(--font-heading); color: var(--primary);">
+          {{ bmi.bmi }} <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">kg/m²</span>
+        </div>
+        <div style="font-size: 13px; margin: 8px 0; color: var(--text-muted);">
+          <b>Ideal Weight Range:</b> {{ bmi.ideal_range }}<br>
+          <b>Estimated Basal Metabolic Rate (BMR):</b> {{ bmi.bmr }} kcal/day
+        </div>
+        <p style="font-size: 13px; color: var(--text-main); margin-top: 8px;">{{ bmi.advice }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- 2. Cardiovascular Risk Screener Card -->
+  <div class="glass-card">
+    <div class="card-header-bar" style="margin-bottom: 16px; padding-bottom: 12px;">
+      <div class="card-title-icon">
+        <div class="icon-box" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">❤️</div>
+        <div>
+          <h3>Cardiovascular Risk</h3>
+          <p class="hint">Lifestyle & vital signs screener</p>
+        </div>
+      </div>
+    </div>
+
+    <form method="post" action="/vitals">
+      <input type="hidden" name="calc_type" value="cardiac">
+      <div class="controls-grid" style="margin-bottom: 14px;">
+        <div>
+          <label class="form-label">Age</label>
+          <input type="number" name="cardiac_age" class="form-control" value="45" required>
+        </div>
+        <div>
+          <label class="form-label">Systolic BP (mmHg)</label>
+          <input type="number" name="systolic_bp" class="form-control" value="128" required>
+        </div>
+      </div>
+
+      <div class="controls-grid" style="margin-bottom: 14px;">
+        <div>
+          <label class="form-label">Resting Heart Rate (BPM)</label>
+          <input type="number" name="heart_rate" class="form-control" value="74" required>
+        </div>
+        <div>
+          <label class="form-label">Tobacco Smoking</label>
+          <select name="smoker" class="form-control">
+            <option value="no">Non-Smoker</option>
+            <option value="yes">Active Smoker</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 18px;">
+        <label class="form-label">Physical Exercise (&gt;150 min/wk)</label>
+        <select name="active" class="form-control">
+          <option value="yes">Yes (Regularly active)</option>
+          <option value="no">No (Sedentary)</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full">Assess Cardiac Risk</button>
+    </form>
+
+    {% if cardiac %}
+      <div style="margin-top: 20px; padding: 18px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Cardiac Risk Level</span>
+          <span class="badge-priority {% if cardiac.color == 'success' %}Mild{% elif cardiac.color == 'warning' %}Moderate{% else %}Urgent{% endif %}">
+            {{ cardiac.level }}
+          </span>
+        </div>
+        <div style="font-size: 26px; font-weight: 800; font-family: var(--font-heading); color: var(--primary);">
+          Score: {{ cardiac.score }} / {{ cardiac.max_score }}
+        </div>
+        <p style="font-size: 13px; color: var(--text-main); margin-top: 8px;">{{ cardiac.note }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- 3. Daily Hydration Calculator Card -->
+  <div class="glass-card">
+    <div class="card-header-bar" style="margin-bottom: 16px; padding-bottom: 12px;">
+      <div class="card-title-icon">
+        <div class="icon-box" style="background: rgba(14, 165, 233, 0.1); color: #0284c7;">💧</div>
+        <div>
+          <h3>Daily Hydration Planner</h3>
+          <p class="hint">Optimal fluid intake baseline</p>
+        </div>
+      </div>
+    </div>
+
+    <form method="post" action="/vitals">
+      <input type="hidden" name="calc_type" value="hydration">
+      <div class="form-group">
+        <label class="form-label">Body Weight (kg)</label>
+        <input type="number" step="0.5" name="water_weight" class="form-control" value="68" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Daily Exercise Activity (minutes)</label>
+        <input type="number" name="water_activity" class="form-control" value="45" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 18px;">
+        <label class="form-label">Surrounding Climate</label>
+        <select name="water_climate" class="form-control">
+          <option value="moderate">Moderate / Temperate</option>
+          <option value="hot">Hot / Humid</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full">Calculate Water Target</button>
+    </form>
+
+    {% if water %}
+      <div style="margin-top: 20px; padding: 18px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+        <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Recommended Fluid Target</div>
+        <div style="font-size: 32px; font-weight: 800; font-family: var(--font-heading); color: #0284c7;">
+          {{ water.liters }} Liters <span style="font-size: 14px; font-weight: 500; color: var(--text-muted);">(~{{ water.glasses }} glasses)</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-main); margin-top: 8px;">{{ water.tip }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

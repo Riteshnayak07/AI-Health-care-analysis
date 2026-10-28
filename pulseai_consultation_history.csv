@@ -1,0 +1,27 @@
+ID,Timestamp,Analysis Type,Input Symptoms,Detected Symptoms,Prediction,Confidence %,Triage Urgency
+26,2026-10-28 23:15:15,computer_vision,Medical Scan Image: skin.jpg (720 × 412 px),"Erythema: 384.259, Sharpness: 179.1",High Diagnostic Quality,79.0,Mild
+25,2026-10-28 23:12:19,symptom,"Just, Just, Just pin, Just, Just pin, Just pin, Free, Free work, Free work",,Common Cold,50.0,Mild
+24,2026-10-28 23:12:17,symptom,"Just, Just, Just pin, Just, Just pin, Just pin, Free, Free work",,Common Cold,50.0,Mild
+23,2026-10-28 23:12:06,symptom,"Just, Just, Just pin, Just, Just pin, Just pin",,Common Cold,50.0,Mild
+22,2026-10-28 23:12:03,symptom,"Just, Just, Just pin, Just, Just pin",,Common Cold,50.0,Mild
+21,2026-10-28 23:12:02,symptom,"Just, Just, Just pin",,Common Cold,50.0,Mild
+20,2026-10-28 23:11:47,symptom,"Sever, Severe, Severe fe, Severe fever, Severe fever, Sever, Severe, Severe fe, Severe fever, Severe fever, Severe fever",fever,Influenza (Flu),62.0,Moderate
+19,2026-10-28 23:11:43,symptom,"Sever, Severe, Severe fe, Severe fever, Severe fever",fever,Influenza (Flu),62.0,Moderate
+18,2026-10-28 23:10:25,symptom,"sneezing, fever, headache, cough, chest pain","fever, headache, cough, sneezing, chest pain",Possible Cardiac Concern (Urgent),96.5,Urgent
+17,2026-10-28 23:10:23,symptom,"sneezing, fever, headache, cough, chest pain","fever, headache, cough, sneezing, chest pain",Possible Cardiac Concern (Urgent),96.5,Urgent
+16,2026-10-28 23:10:20,symptom,"sneezing, fever, headache, cough","fever, headache, cough, sneezing",Influenza (Flu),86.0,Moderate
+15,2026-10-28 23:10:19,symptom,"sneezing, fever, headache","fever, headache, sneezing",Influenza (Flu),74.0,Moderate
+14,2026-10-28 23:10:18,symptom,"sneezing, fever","fever, sneezing",Common Cold,62.0,Mild
+13,2026-10-28 23:10:16,symptom,sneezing,sneezing,Common Cold,62.0,Mild
+12,2026-10-28 23:04:26,symptom,severe chest pain and shortness of breath,"shortness of breath, chest pain",Possible Cardiac Concern (Urgent),96.5,Urgent
+11,2026-10-28 23:02:20,symptom,"fever, fever, chills, fatigue, body pain, sweating, headache","fever, chills, fatigue, body pain, sweating, headache",Viral Fever,92.0,Moderate
+10,2026-10-28 23:02:15,symptom,"fever, fever, chills, fatigue, body pain, sweating, headache","fever, chills, fatigue, body pain, sweating, headache",Viral Fever,92.0,Urgent
+9,2026-10-28 23:02:13,symptom,"fever, fever, chills, fatigue, body pain, sweating","fever, chills, fatigue, body pain, sweating",Viral Fever,92.0,Urgent
+8,2026-10-28 23:02:10,symptom,"fever, fever, chills, fatigue, body pain","fever, chills, fatigue, body pain",Influenza (Flu),92.0,Urgent
+7,2026-10-28 23:02:08,symptom,"fever, fever, chills, fatigue","fever, chills, fatigue",Influenza (Flu),86.0,Urgent
+6,2026-10-28 23:02:07,symptom,"fever, fever, chills","fever, chills",Influenza (Flu),74.0,Urgent
+5,2026-10-28 23:02:05,symptom,fever,fever,Influenza (Flu),62.0,Urgent
+4,2026-10-28 23:02:05,symptom,"fever, fever",fever,Influenza (Flu),62.0,Urgent
+3,2026-10-28 23:00:39,symptom,fever and headache,"fever, headache",Influenza (Flu),74.0,Moderate
+2,2026-10-28 22:41:24,symptom,fever,fever,Flu,65.0,Mild
+1,2026-09-05 12:52:08,symptom,i have fewer,,Insufficient Information,0.0,Mild

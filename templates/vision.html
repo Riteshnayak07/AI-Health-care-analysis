@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Computer Vision - PulseAI{% endblock %}
+
+{% block content %}
+<section class="hero-banner">
+  <div class="badge-live">
+    <span class="dot-pulse"></span> OpenCV 4.x Vision Pipeline Active
+  </div>
+  <h1>Medical Image & Scan Quality Analyzer</h1>
+  <p>Upload a clinical photograph (e.g. skin rash, eye photo, prescription, or medical scan print) to evaluate diagnostic sharpness, brightness, contrast, erythema redness, and edge fidelity.</p>
+</section>
+
+<div class="glass-card">
+  <div class="card-header-bar">
+    <div class="card-title-icon">
+      <div class="icon-box">🔬</div>
+      <div>
+        <h2>Upload Medical Photo or Scan</h2>
+        <p class="hint">Accepts JPG, PNG, and WebP images up to 16MB</p>
+      </div>
+    </div>
+    <span class="logo-badge">Edge & Erythema Screener</span>
+  </div>
+
+  {% if error %}
+    <div class="red-flags-box" style="margin-top: 0; margin-bottom: 20px;">
+      <h4><span>⚠️</span> Analysis Notice</h4>
+      <p style="margin: 0;">{{ error }}</p>
+    </div>
+  {% endif %}
+
+  <form method="post" action="/vision" enctype="multipart/form-data">
+    <div class="dropzone-box" onclick="document.getElementById('imageFileInput').click()">
+      <div class="dropzone-icon">📷</div>
+      <h3 style="font-size: 18px; margin-bottom: 6px;">Choose a file or drag & drop here</h3>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Medical scans, skin rash photos, or clinical documentation</p>
+      <input type="file" id="imageFileInput" name="image" accept="image/*" style="display: none;" onchange="previewUpload(event)" required>
+      <button type="button" class="btn btn-secondary" style="pointer-events: none;">Browse Files</button>
+      <div id="fileChosenLabel" style="margin-top: 12px; font-weight: 600; color: var(--primary); font-size: 14px;"></div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full" style="margin-top: 20px;">
+      <span>🔬</span> Run Computer Vision Inspection
+    </button>
+  </form>
+</div>
+
+{% if details %}
+  <div class="glass-card">
+    <div class="card-header-bar">
+      <div class="card-title-icon">
+        <div class="icon-box" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">✓</div>
+        <div>
+          <h2>Computer Vision Diagnostics Report</h2>
+          <p class="hint">OpenCV feature extraction & image quality grading</p>
+        </div>
+      </div>
+      <div>
+        <span class="badge-priority {% if confidence >= 70 %}Mild{% elif confidence >= 50 %}Moderate{% else %}Urgent{% endif %}">
+          Score: {{ confidence }}%
+        </span>
+      </div>
+    </div>
+
+    <div class="vision-result-grid">
+      <!-- Left: Processed Edge & Feature Heatmap Preview -->
+      <div>
+        <h4 style="font-size: 14px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">
+          Processed Vision Overlay (JET Heatmap + Canny Edges)
+        </h4>
+        <img src="{{ details.preview_data_url }}" alt="OpenCV Processed Image" class="vision-preview-img">
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px; text-align: center;">
+          Edge contours and density distribution generated via OpenCV Canny filter
+        </p>
+      </div>
+
+      <!-- Right: Quantitative Metrics Table -->
+      <div>
+        <h4 style="font-size: 14px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">
+          Diagnostic Parameters
+        </h4>
+
+        <div style="background: var(--bg-secondary); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 18px;">
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Overall Diagnostic Assessment</span>
+            <strong style="color: var(--primary);">{{ details.quality_assessment }}</strong>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Erythema / Rash Redness Index</span>
+            <strong>{{ details.redness_index }}</strong>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Cutaneous Classification</span>
+            <span style="font-size: 13px; font-weight: 600;">{{ details.erythema_assessment }}</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Laplacian Sharpness Variance</span>
+            <strong>{{ details.sharpness_laplacian }}</strong>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Image Dimensions</span>
+            <strong>{{ details.resolution }}</strong>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Contrast Dynamic Range (StdDev)</span>
+            <strong>{{ details.contrast_std }}</strong>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Mean Brightness</span>
+            <strong>{{ details.mean_brightness }} / 255</strong>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Edge Density Score</span>
+            <strong>{{ details.edge_density_pct }}%</strong>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; padding: 14px; background: rgba(14, 165, 233, 0.08); border-radius: var(--radius-md); font-size: 13px;">
+          <b>Clinical Photography Tip:</b> For optimal tele-dermatology inspection, capture photos in bright indirect daylight, ensure the lens is 15-20cm away, and keep the camera parallel to the skin surface.
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<script>
+function previewUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    document.getElementById('fileChosenLabel').textContent = "Selected: " + file.name + " (" + (file.size/1024).toFixed(1) + " KB)";
+  }
+}
+</script>
+{% endblock %}
